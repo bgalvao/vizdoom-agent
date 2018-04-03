@@ -2,7 +2,9 @@
 # for any of the rl algos I am testing
 
 from vizdoom import *
-import skimage
+from skimage import transform
+import itertools as it
+import numpy as np
 
 # get this conda env to get configuration file
 import subprocess
@@ -13,6 +15,10 @@ suffix = 'lib/python3.6/site-packages/vizdoom/scenarios/'
 scenarios_path = prefix + suffix
 scenarios = ['simpler_basic.cfg', 'rocket_basic.cfg', 'basic.cfg']
 scenario = scenarios_path + scenarios[0]
+
+# params
+frame_repeat = 12
+resolution = (30, 45)
 
 class ReplayMemory:
     pass
@@ -26,10 +32,12 @@ class DoomEnv:
         self.game.set_window_visible(False)
         self.game.set_mode(Mode.PLAYER)
         self.game.set_screen_resolution(ScreenResolution.RES_640X480)
-        self.game.init()  # ISSUE!!
+        self.game.init()
+
+        self.actions = self.actions()
+        self.down_res = resolution
         print("Doom initialized")
 
-    @property
     def actions(self):
         n = self.game.get_available_buttons_size()
         return [list(a) for a in it.product([0, 1], repeat=n)]
@@ -40,14 +48,18 @@ class DoomEnv:
     def is_finished(self):
         self.game.is_episode_finished()
 
-    @staticmethod
-    def preprocess(frame):
-        return skimage.transform.resize(frame, resolution).astype(np.float32)
+    def preprocess(frame, resolution):
+        return transform.resize(frame, resolution).astype(np.float32)
 
     def get_screen(self):  # aka input
-        return preprocess(self.game.get_state().screen_buffer)
+        return self.preprocess(self.game.get_state().screen_buffer, resolution)
+
+    def execute(self, action_index):
+        return game.make_action(self.actions[action_index], frame_repeat)
 
 
 if __name__ == '__main__':
 
     env = DoomEnv(scenario)
+    actions = env.actions()
+    print()
