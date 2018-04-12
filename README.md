@@ -13,6 +13,6 @@ In a first instance, these will be tested against a single environment, [ViZDoom
 
 ## Presentation
 
-All shall be published in a webpage hosted by a branch of this repo. Planning on using bokeh.
+All shall be published in a webpage hosted by a branch of this repo. Planning on using [`bokeh`](https://bokeh.pydata.org/en/latest/).
 
 ^1 Stephen Kelly and Malcolm I. Heywood. 2017. _Multi-task learning in Atari video games with emergent tangled program graphs_. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO '17). ACM, New York, NY, USA, 195-202. DOI: https://doi.org/10.1145/3071178.3071303 
