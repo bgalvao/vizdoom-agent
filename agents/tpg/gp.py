@@ -105,7 +105,7 @@ class Tree(list):
     def size(self):  # mostly an alias
         return len(self)
 
-    # DEAP-'inspired' @ https://github.com/DEAP/deap/blob/f141d3fe690e85a2748dae5b73f14ad5e9f784ad/deap/gp.py#L153
+    # DEAP @ https://github.com/DEAP/deap/blob/f141d3fe690e85a2748dae5b73f14ad5e9f784ad/deap/gp.py#L153
     @property
     def depth(self):
         stack = [0]
@@ -161,7 +161,7 @@ class Tree(list):
             args = []
             for i in range(node.arity):
                 idx += 1
-                args.append(self.get_delayed_task(data, idx))
+                args.append(self.get_lazy_task(data, idx))
             return node(args)
 
     def output(self, data):
