@@ -5,9 +5,11 @@
 # DOI: https://doi.org/10.1145/3071178.3071303
 
 
-from gp import Tree
-from numpy.random import randint, choice, random
+from tree import Tree
+from numpy.random import randint, choice, random, seed
+#seed(32)
 
+#rgb = 65536 * r + 256 * g + b;
 
 class Program(Tree):
     
@@ -18,22 +20,37 @@ class Program(Tree):
 
     @property
     def bid(self, data):
+        inpt = data[:,:,0]*65536 + data[:,:,1]*256 + data[:,:,2]
         return self.output.sum()  # this is a column to be reduced :o
+
+    @action.setter
+    def action(self, action):
+        self.action = action
 
 
 class Team(list):  # really like a typical GA individual
 
     def __init__(self):
         list.__init__(self, *args)
+        self.fitness = 0
 
+    def get_fitness(self):
+        return self.get_fitness
 
-    def _set(self):
-        result = []
-        # result.append(item) for item in self if item not in result
-        for item in self:
-            if item in result: continue
-            result.append(item)
-        return result
+    @property
+    def size(self):
+        return len(self)
+
+    def act(self, inpt, idx=0, visited_teams=[]):
+        current_team = self.graph[idx]
+        visited_teams.append(csurrent_team)
+        bids = {program.bid(inpt): program.action for program in current_team.index}
+        for i in reversed(sorted(bids)):
+            p = bids[i]
+            if type(p.action) == Team:
+                self.act(inpt, idx+1, visited_teams)
+            else:
+                return p.action
 
     def is_sufficient(self):
         # returns true if it has at least two atomic actions
@@ -70,39 +87,3 @@ class Team(list):  # really like a typical GA individual
         return offspring
 
 
-class PolicyGraph():
-
-    def __init__(self):
-        self.graph = []  # a tree of teams and programs
-
-    def act(self, inpt, idx=0, visited_teams=[]):
-        current_team = self.graph[idx]
-        visited_teams.append(current_team)
-        bids = {program.bid(inpt), program.action for program in current_team.index}
-        for i in reversed(sorted(bids)):
-            p = bids[i]
-            if type(p.action) == Team:
-                self.act(inpt, idx+1, visited_teams)
-            else:
-                return p.action
-
-    def crossover_with(self, policy_graph_daddy):
-        pass
-
-    def mutate(self):
-        pass
-
-    def evaluate(self):
-        pass
-
-
-class ProgramPopulation(list):
-
-    def __init__(self, *args):
-        list.__init__(self, *args)
-
-    def has(self, program):
-        return program in self
-
-    def find_keeper_programs(self, list_of_programs):
-        pass 

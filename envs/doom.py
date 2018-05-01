@@ -20,9 +20,6 @@ scenario = scenarios_path + scenarios[0]
 frame_repeat = 12
 resolution = (30, 45)
 
-class ReplayMemory:
-    pass
-
 
 class DoomEnv:
 
