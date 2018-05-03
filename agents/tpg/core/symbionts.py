@@ -27,6 +27,9 @@ class Program(Tree):
     def action(self, action):
         self.action = action
 
+    def reproduce(self):
+        pass
+
 
 class Team(list):  # really like a typical GA individual
 

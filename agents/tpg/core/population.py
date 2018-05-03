@@ -3,6 +3,8 @@ import numpy as np
 from numpy.random import choice
 
 from symbionts import Program, Team
+import tree.Tree.crossover as crossover
+import tree.Tree.mutation as mutation
 
 
 class Population(list):
@@ -31,6 +33,11 @@ class ProgramPopulation(Population):
     def __init__(self):
         super(ProgramPopulation, self).__init__()
 
+    def __str__(self):
+        return 'ProgramPopulation @ %s\n%s' % \
+                (hex(id(self)), {'pop_size': self.pop_size, \
+                'xo_rate': self.xo_rate}.__str__())
+
     def init_pop(self, data, action_set, min_depth=4, max_depth=6):
         # ramped half-half
         indivs_per_depth = self.pop_size / (max_depth - min_depth + 1)
@@ -57,16 +64,20 @@ class ProgramPopulation(Population):
         for i in self.pop:
             print(i)
 
-    def __str__(self):
-        return 'ProgramPopulation @ %s\n%s' % \
-                (hex(id(self)), {'pop_size': self.pop_size, \
-                'xo_rate': self.xo_rate}.__str__())
+    def purge(self, team_population):
+        return [member for member in team for team in team_population]
+
+    def variate(self, parameter_list):
+        pass
 
 
 class TeamPopulation(Population):
 
-    def __init__(self):
+    def __init__(self, cutoff=10, min_team_size=2, max_team_size=5):
         super(TeamPopulation, self).__init__()
+        self.min_team_size = min_team_size
+        self.max_team_size = max_team_size
+        self.cutoff = cutoff
 
     def init_pop(self, program_population, team_size=15):
         """
@@ -82,6 +93,23 @@ class TeamPopulation(Population):
         """
         pool = [choice(self) for i in range(pooling_size)]
         return max(pool, key=get_fitness)
+
+    def reproduce(self):
+        p1 = self.select()
+        if np.random.rand() < self.xo_rate:
+            p2 = self.select()
+            return crossover(p1, p2)
+        else:
+            return mutation(p1)
+
+    def variate(self, elites):
+        new_pop = TeamPopulation()
+        new_pop.extend([self.reproduce for i in range(len(self))])
+        return new_pop
+            
+
+
+
 
 
 if __name__ == '__main__':
