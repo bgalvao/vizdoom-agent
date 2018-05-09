@@ -7,11 +7,28 @@ import numpy as np
 
 class TPGAgent:
 
-    def __init__(self, action_set_size, functional_set, terminal_set):
-        action_set = game_env.actions()
+    def __init__(self, action_set_size,
+                 functional_set, terminal_set,
+                 program_population_size=50,
+                 program_population_xo_rate=.1,
+                 team_population_size=50,
+                 team_population_xo_rate=.1,
+                 team_population_cutoff=10,
+                 min_team_size=2,
+                 max_team_size=5):
+        self.program_population = ProgramPopulation(program_population_size,
+                                   program_population_xo_rate)\
+                                  .init_pop(action_set_size,
+                                   functional_set,
+                                   terminal_set)
 
-        self.program_population = ProgramPopulation().init_pop(action_set_size, functional_set, terminal_set)
-        self.team_population = TeamPopulation().init_pop(self.program_population)
+        self.team_population = TeamPopulation(
+                                team_population_size,
+                                team_population_xo_rate,
+                                team_population_cutoff,
+                                min_team_size,
+                                max_team_size)\
+                               .init_pop(self.program_population)
 
     def evaluate_team_population(self, game_env, rounds = 3):
         inpt = game_env.get_screen()

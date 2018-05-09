@@ -24,21 +24,26 @@ class Population(list):
     Only Teams do. So I'm just declaring it here without enforcing it
     on all inheriting classes.
     """
+
     def select(self):
         pass
 
 
 class ProgramPopulation(Population):
 
-    def __init__(self):
-        super(ProgramPopulation, self).__init__()
+    def __init__(self, pop_size=50, xo_rate=0.1):
+        super(ProgramPopulation, self).__init__(pop_size, xo_rate)
 
     def __str__(self):
         return 'ProgramPopulation @ %s\n%s' % \
-                (hex(id(self)), {'pop_size': self.pop_size, \
-                'xo_rate': self.xo_rate}.__str__())
+            (hex(id(self)), {'pop_size': self.pop_size,
+                             'xo_rate': self.xo_rate}.__str__())
 
-    def init_pop(self, data, action_set_size, functional_set, terminal_set, min_depth=4, max_depth=6):
+    def init_pop(self, action_set_size, functional_set, terminal_set, min_depth=4, max_depth=6):
+        """
+        :param :
+        """
+
         # ramped half-half
         indivs_per_depth = self.pop_size / (max_depth - min_depth + 1)
         remaining_indivs = self.pop_size % (max_depth - min_depth + 1)
@@ -46,20 +51,24 @@ class ProgramPopulation(Population):
         grow_indivs = int(np.floor(indivs_per_depth / 2))
         full_indivs = int(np.ceil(indivs_per_depth / 2))
 
-        for depth in range(min_depth, max_depth+1):
+        for depth in range(min_depth, max_depth + 1):
             if depth == max_depth:
-                grow_indivs = int(np.floor((indivs_per_depth + remaining_indivs) / 2.0))
-                full_indivs = int(np.ceil((indivs_per_depth + remaining_indivs) / 2.0))
-            
-            fullies = [Program.full(functional_set, terminal_set, full_depth=depth)\
-                        .set_action(choice(action_set))
-                        for _ in range(full_indivs)]
+                grow_indivs = int(
+                    np.floor((indivs_per_depth + remaining_indivs) / 2.0))
+                full_indivs = int(
+                    np.ceil((indivs_per_depth + remaining_indivs) / 2.0))
 
-            grownies = [Program.grow(functional_set, terminal_set, min_depth=depth, max_depth=max_depth)\
-                        .set_action(choice(action_set))
+            fullies = [Program(choice(action_set_size))
+                      .rfull(functional_set, terminal_set, full_depth=depth)
+                       for _ in range(full_indivs)]
+
+            grownies = [Program(choice(action_set_size))
+                       .grow(functional_set, terminal_set, min_depth=depth,
+                        max_depth=max_depth)
                         for _ in range(grow_indivs)]
 
-            self.extend(fullies).extend(grownies)
+            self.extend(fullies)
+            self.extend(grownies)
 
         return self
 
@@ -76,8 +85,8 @@ class ProgramPopulation(Population):
 
 class TeamPopulation(Population):
 
-    def __init__(self, cutoff=10, min_team_size=2, max_team_size=5):
-        super(TeamPopulation, self).__init__()
+    def __init__(self, pop_size=50, xo_rate=0.1, cutoff=10, min_team_size=2, max_team_size=5):
+        super(TeamPopulation, self).__init__(pop_size, xo_rate)
         self.min_team_size = min_team_size
         self.max_team_size = max_team_size
         self.cutoff = cutoff
@@ -87,8 +96,8 @@ class TeamPopulation(Population):
         :param ProgramPopulation program_population: list of Program's
         :param int team_size: size of the team. Fixed length for the evolutionary process.
         """
-        self.extend([Team().extend(choice(program_population, team_size)) \
-                    for i in range(self.pop_size)])
+        self.extend([Team().extend(choice(program_population, team_size))
+                     for i in range(self.pop_size)])
 
     def select(self, pooling_size=6):
         """
@@ -109,10 +118,6 @@ class TeamPopulation(Population):
         new_pop = TeamPopulation()
         new_pop.extend([self.reproduce for i in range(len(self))])
         return new_pop
-            
-
-
-
 
 
 if __name__ == '__main__':

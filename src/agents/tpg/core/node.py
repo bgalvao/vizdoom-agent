@@ -22,10 +22,13 @@ class InputNode(Node):
     def __init__(self, index):
         super(InputNode, self).__init__()
         self.index = index
-        self.arity = 1
+        self.arity = 0
 
     def __call__(self, data):
         return data[self.index]
+
+    def __str__(self):
+        return 'InputNode(%s)' % (self.index)
 
     def graph_str(self):
         return 'X' + self.index
@@ -45,7 +48,7 @@ class OpNode(Node):
                                 #args passed ({})'\
                                 .format(self.arity, len(args)))
 
-    def __repr__(self):
+    def __str__(self):
         return 'OpNode(%s)' % (self.op.__str__().split()[1])
 
     def graph_str(self):

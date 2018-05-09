@@ -1,18 +1,24 @@
-from envs.doom import DoomEnv
+#from envs.doom import DoomEnv
 from agents.tpg.agent import TPGAgent
 from agents.tpg.core.node_sets import fset, tset
 
-from vizdoom import ScreenFormat
+
+import numpy as np
+
+from agents.tpg.core.symbionts import Program
+
+# from vizdoom import ScreenFormat
 
 if __name__ == '__main__':
 
     # start environment with single channel
-    env = DoomEnv(0, rgb_channels=False)
-    
+    #env = DoomEnv(0, rgb_channels=False)
+
     # initalize functional and terminal sets
-    fun_set = fset()
-    sample_data = env.get_screen().flatten()
+    fset = fset()
+    sample_data = np.random.rand(35, 40).flatten()
     tset = tset(sample_data)
 
-    # start a new agent
-    tpg = TPGAgent(DoomEnv)
+    print('initializing agent...')
+    tpg_agent = TPGAgent(10, fset, tset)
+    print('done')

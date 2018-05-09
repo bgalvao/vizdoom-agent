@@ -14,7 +14,13 @@ class Tree(list):
         list.__init__(self, *args)
         self.address = hex(id(self))
 
-    @staticmethod
+    def __str__(self):
+        output = '['
+        for i in range(len(self)-1):
+            output = output + self[i].__str__() + ', '
+        #return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
+        return output[:-2] + ']'
+
     def grow(self, functional_set, terminal_set, min_depth=4, max_depth=6):
         if type(functional_set) is not list:
             raise TypeError("functional set must be a list")
@@ -38,9 +44,25 @@ class Tree(list):
                 self.append(choice(functional_set))   
             for _ in range(self[-1].arity):
                 stack.append(depth + 1)
+
+        self.append(choice(terminal_set))  # what the hack
         return self
 
-    @staticmethod
+    def rgrow(self, functional_set, terminal_set, max_depth=6, current_depth=0):
+
+        if current_depth == max_depth:
+            self.append(choice(terminal_set))
+        else:
+            if random() < 0.5:
+                self.append(choice(functional_set))
+            else:
+                self.append(choice(terminal_set))
+
+        for _ in range(self[-1].arity):
+            self.rgrow(functional_set, terminal_set, max_depth, current_depth+1)
+
+        return self
+
     def full(self, functional_set, terminal_set, full_depth=6):
         # data_dim: dimensionality of data
         # max_depth: maximum height of tree
@@ -51,9 +73,24 @@ class Tree(list):
                 self.append(choice(terminal_set))
             elif depth < full_depth:
                 self.append(choice(functional_set))
+                print('depth < full_depth')
             for _ in range(self[-1].arity):
                 stack.append(depth + 1)
+        self.append(choice(terminal_set))  # what the hack
         return self
+
+    def rfull(self, functional_set, terminal_set, full_depth=6, current_depth=0):
+        """
+        Recursive form of full function. Use this one for stack calls < 1000.
+        """
+        if current_depth == full_depth:
+            self.append(choice(terminal_set))
+        elif current_depth < full_depth:
+            self.append(choice(functional_set))
+        for _ in range(self[-1].arity):
+            self.rfull(functional_set, terminal_set, full_depth, current_depth+1)
+        return self
+
 
     @staticmethod
     def from_node_list(node_list):
@@ -62,41 +99,21 @@ class Tree(list):
         return t
 
     @property
-    def terminal_set(self):
-        return self.terminal_set
-
-    @terminal_set.setter
-    def terminal_set(self, tset):
-        assert type(tset) == list, "terminal set must be set with a list"
-        assert len(tset) > 0, "cannot set empty terminal set"
-        self.terminal_set = tset
-
-    @property
-    def functional_set(self):
-        return self.functional_set
-
-    @functional_set.setter
-    def functional_set(self, fset):
-        assert type(fset) == list, "functional set must be set with a list"
-        assert len(fset) > 0, "cannot set empty functional set"
-        self.functional_set = fset
-
-
-    @property
     def size(self):
         return len(self)
 
-    # DEAP @ https://github.com/DEAP/deap/(...)/deap/gp.py#L153
-    @property
-    def depth(self):
-        stack = [0]
-        max_depth = 0
-        for elem in self:
-            print(elem)
-            depth = stack.pop()
-            max_depth = max(max_depth, depth)
-            stack.extend([depth + 1] * elem.arity)
-        return max_depth
+    def rdepth(self, node=0, current_depth=0, max_depth=0):
+        if type(self[node]) == InputNode:
+            return current_depth
+        elif type(self[node]) == OpNode:
+            if current_depth > max_depth:
+                max_depth = current_depth
+            for _ in range(self[node].arity):
+                node += 1
+                return self.rdepth(node, current_depth+1, max_depth)
+
+
+
 
     def _outer_left_copy(self, excluding_node_at):
         return self[:excluding_node_at]
@@ -159,9 +176,6 @@ class Tree(list):
             while stack and stack[-1][1] == 0:
                 stack.pop()
         return nodes, edges, labels
-
-    def __str__(self):
-        return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
 
     def crossover(self, p2):
         offspring = Tree()
