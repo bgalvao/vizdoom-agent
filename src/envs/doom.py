@@ -14,38 +14,48 @@ suffix = 'lib/python3.6/site-packages/vizdoom/scenarios/'
 
 scenarios_path = prefix + suffix
 scenarios = ['simpler_basic.cfg', 'rocket_basic.cfg', 'basic.cfg']
-scenario = scenarios_path + scenarios[0]
+
+def scenario(scenario_index):
+    # aka configuration file path
+    return scenarios_path + scenarios[scenario_index]
 
 # params
 frame_repeat = 12
 resolution = (30, 45)
 
-
 class DoomEnv:
 
-    def __init__(self, config_file_path):
+    def __init__(self, scenario_index, rgb_channels=False):
+        """
+        :param int scenario_index: index of one of the available scenarios
+        :param int screen_format: index of one of the available screen formats
+        """
         self.game = DoomGame()
-        self.game.load_config(config_file_path)
+        self.game.load_config(scenario(scenario_index))
         self.game.set_window_visible(False)
         self.game.set_mode(Mode.PLAYER)
+        if rgb_channels is True:
+            self.game.set_screen_format(ScreenFormat.RGB24)
+        else:
+            self.game.set_screen_format(ScreenFormat.DOOM_256_COLORS8)
         self.game.set_screen_resolution(ScreenResolution.RES_640X480)
         self.game.init()
 
-        self.actions = self.actions()
+        self.n_actions = self.game.get_available_buttons_size()
         self.down_res = resolution
         print("Doom initialized")
 
-    def actions(self):
-        n = self.game.get_available_buttons_size()
+    def combo_actions(self):
+        n = self.n_actions
         return [list(a) for a in it.product([0, 1], repeat=n)]
 
     def reset(self):  # to be used every new epoch / iteration
         self.game.new_episode()
 
     def is_finished(self):
-        self.game.is_episode_finished()
+        return self.game.is_episode_finished()
 
-    def preprocess(frame, resolution):
+    def preprocess(self, frame, resolution):
         return transform.resize(frame, resolution).astype(np.float32)
 
     def get_screen(self):  # aka input
@@ -58,5 +68,4 @@ class DoomEnv:
 if __name__ == '__main__':
 
     env = DoomEnv(scenario)
-    actions = env.actions()
-    print()
+    print(env.combo_actions())

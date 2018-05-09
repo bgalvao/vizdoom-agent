@@ -1,15 +1,15 @@
 from abc import ABCMeta, abstractmethod
+
 import numpy as np
 from numpy.random import choice
 
-from symbionts import Program, Team
-import tree.Tree.crossover as crossover
-import tree.Tree.mutation as mutation
+from agents.tpg.core.symbionts import Program, Team
+from agents.tpg.core.tree import Tree
 
 
 class Population(list):
 
-    def __init__(self, pop_size=50, xo_rate=.1):
+    def __init__(self, pop_size=50, xo_rate=.1, *args):
         list.__init__(self, *args)
         self.pop_size = pop_size
         self.xo_rate = xo_rate
@@ -38,7 +38,7 @@ class ProgramPopulation(Population):
                 (hex(id(self)), {'pop_size': self.pop_size, \
                 'xo_rate': self.xo_rate}.__str__())
 
-    def init_pop(self, data, action_set, min_depth=4, max_depth=6):
+    def init_pop(self, data, action_set_size, functional_set, terminal_set, min_depth=4, max_depth=6):
         # ramped half-half
         indivs_per_depth = self.pop_size / (max_depth - min_depth + 1)
         remaining_indivs = self.pop_size % (max_depth - min_depth + 1)
@@ -51,12 +51,15 @@ class ProgramPopulation(Population):
                 grow_indivs = int(np.floor((indivs_per_depth + remaining_indivs) / 2.0))
                 full_indivs = int(np.ceil((indivs_per_depth + remaining_indivs) / 2.0))
             
-            fullies = [Program.full(data.shape[1]).set_action(choice(action_set))
-                       for i in range(full_indivs)]
-            grownies = [Program.grow(data.shape[1]).set_action(choice(action_set))
-                        for i in range(grow_indivs)]
+            fullies = [Program.full(functional_set, terminal_set, full_depth=depth)\
+                        .set_action(choice(action_set))
+                        for _ in range(full_indivs)]
 
-            self.extend(fullies); self.extend(grownies)
+            grownies = [Program.grow(functional_set, terminal_set, min_depth=depth, max_depth=max_depth)\
+                        .set_action(choice(action_set))
+                        for _ in range(grow_indivs)]
+
+            self.extend(fullies).extend(grownies)
 
         return self
 

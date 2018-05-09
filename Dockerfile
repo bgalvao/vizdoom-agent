@@ -4,7 +4,7 @@ RUN conda update -n base conda
 RUN conda install pytorch-cpu torchvision pytorch cuda90 -c pytorch
 
 # other
-RUN conda install -c conda-forge bokeh
+RUN conda install bokeh pip scikit-image pylint -c conda-forge
 
 # vizdoom - zdoom dependencies
 RUN apt update
@@ -15,6 +15,9 @@ libopenal-dev timidity libwildmidi-dev unzip
 
 # vizdoom - boost libraries
 RUN apt install -y libboost-all-dev
+
+# utility
+RUN apt install -y tree
 
 # vizdoom
 RUN pip install vizdoom

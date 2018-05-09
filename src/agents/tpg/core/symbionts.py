@@ -5,7 +5,7 @@
 # DOI: https://doi.org/10.1145/3071178.3071303
 
 
-from tree import Tree
+from agents.tpg.core.tree import Tree
 from numpy.random import randint, choice, random, seed
 #seed(32)
 
@@ -20,12 +20,7 @@ class Program(Tree):
 
     @property
     def bid(self, data):
-        inpt = data[:,:,0]*65536 + data[:,:,1]*256 + data[:,:,2]
-        return self.output.sum()  # this is a column to be reduced :o
-
-    @action.setter
-    def action(self, action):
-        self.action = action
+        return self.output  # this is a column to be reduced :o
 
     def reproduce(self):
         pass
@@ -33,7 +28,7 @@ class Program(Tree):
 
 class Team(list):  # really like a typical GA individual
 
-    def __init__(self):
+    def __init__(self, *args):
         list.__init__(self, *args)
         self.fitness = 0
 
@@ -45,8 +40,8 @@ class Team(list):  # really like a typical GA individual
         return len(self)
 
     def act(self, inpt, idx=0, visited_teams=[]):
-        current_team = self.graph[idx]
-        visited_teams.append(csurrent_team)
+        current_team = self[idx]
+        visited_teams.append(current_team)
         bids = {program.bid(inpt): program.action for program in current_team.index}
         for i in reversed(sorted(bids)):
             p = bids[i]
@@ -57,12 +52,12 @@ class Team(list):  # really like a typical GA individual
 
     def is_sufficient(self):
         # returns true if it has at least two atomic actions
-        return len(set([p.action for p in self.index if type(p.action) is not Team])) >= 2
+        return len(set([p.action for p in self if type(p.action) is not Team])) >= 2
 
     def crossover_with(self, daddy_team):
         # get unique elements...
-        p1 = self._set()
-        p2 = daddy_team._set()
+        p1 = self
+        p2 = daddy_team
         # random crossover points
         rcp1 = randint(len(p1))
         rcp2 = randint(len(p2))

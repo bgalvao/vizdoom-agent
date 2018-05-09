@@ -1,28 +1,30 @@
+from agents.tpg.core.node import OpNode, InputNode
+from agents.tpg.core.node_sets import fset, tset
+
 from abc import ABCMeta, abstractmethod
 from numpy.random import choice
 from random import random
-from node import OpNode, InputNode
-from node_sets import fset, tset
 
 #from numpy.random import seed; seed(32)
 
 # any identical code to deap is no coincidence at all.
 class Tree(list):
 
-    def __init__(self, fset, tset *args):
+    def __init__(self, *args):
         list.__init__(self, *args)
         self.address = hex(id(self))
 
     @staticmethod
-    def grow(self, functional_set, terminal_set, min_depth=0, max_depth=6):
-        assert type(fset) == list, "functional set must be set with a list"
-        assert len(fset) > 0, "cannot set empty functional set"
-        self.functional_set = fset
-        assert type(tset) == list, "terminal set must be set with a list"
-        assert len(tset) > 0, "cannot set empty terminal set"
-        # data_dim: dimensionality of data
-        # max_depth: maximum height of tree
-        height = 0
+    def grow(self, functional_set, terminal_set, min_depth=4, max_depth=6):
+        if type(functional_set) is not list:
+            raise TypeError("functional set must be a list")
+        elif len(functional_set) == 0:
+            raise ValueError("cannot use empty functional set")
+        elif type(terminal_set) is not list:
+            raise TypeError("terminal set must be a list")
+        elif len(terminal_set) == 0:
+            raise ValueError("cannot use empty terminal set")
+
         stack = [0]
         while len(stack) != 0:
             depth = stack.pop()
@@ -34,23 +36,22 @@ class Tree(list):
                 self.append(choice(terminal_set))
             else:
                 self.append(choice(functional_set))   
-            for arg in range(self[-1].arity):
+            for _ in range(self[-1].arity):
                 stack.append(depth + 1)
         return self
 
     @staticmethod
-    def full(self, functional_set, terminal_set, min_depth=0, max_depth=6):
+    def full(self, functional_set, terminal_set, full_depth=6):
         # data_dim: dimensionality of data
         # max_depth: maximum height of tree
-        height = 0
         stack = [0]
         while len(stack) != 0:
             depth = stack.pop()
-            if depth == max_depth:
+            if depth == full_depth:
                 self.append(choice(terminal_set))
-            elif depth < min_depth or depth < max_depth:
+            elif depth < full_depth:
                 self.append(choice(functional_set))
-            for arg in range(self[-1].arity):
+            for _ in range(self[-1].arity):
                 stack.append(depth + 1)
         return self
 
@@ -114,13 +115,14 @@ class Tree(list):
         '''
         if type(from_node) != int:
             raise TypeError('Parameter from_node is an int indicating node\'s index')
-        elif from_node < 0 or from_node => self.size:
+        elif from_node < 0 or from_node >= self.size:
             raise ValueError('Parameter from_node does not fit size of this tree')
         elif type(self[from_node]) == InputNode:
             return 1
         elif type(self[from_node]) == OpNode:
             subtree_node_count = 1  # we're still on the first node
-            subtree_node_count += self._count_subtree_nodes for i in self[from_node].arity
+            for i in self[from_node].arity:
+                subtree_node_count += 1
             return subtree_node_count
 
     def _subtree_copy(self, from_node, subtree_nodes):
@@ -128,7 +130,7 @@ class Tree(list):
 
     def _get_lazy_task(self, data, idx=0):
         node = self[idx]
-        if type(node) is VarNode:
+        if type(node) is InputNode:
             return node(data)
         else:
             args = []
@@ -161,28 +163,26 @@ class Tree(list):
     def __str__(self):
         return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
 
-    @staticmethod
-    def crossover(p1, p2):
+    def crossover(self, p2):
         offspring = Tree()
         
-        xo_point_p1 = choice(p1.size)
+        xo_point_p1 = choice(self.size)
         xo_point_p2 = choice(p2.size)
 
-        subnodes_count_p1 = p1._count_subtree_nodes(xo_point_p1)
-        subnodes_count_p2 = p2._count_subtree_nodes(xo_point_p2)
+        subnodes_count_p1 = self._count_subtree_nodes(xo_point_p1)
+        subnodes_count_p2 = self._count_subtree_nodes(xo_point_p2)
 
-        p1_left_copy = p1._outer_left_copy(xo_point_p1)
+        p1_left_copy = self._outer_left_copy(xo_point_p1)
         p2_subtree_copy = p2._subtree_copy(xo_point_p2, subnodes_count_p2)
-        p1_right_copy = p1._outer_right_copy(xo_point_p1 + subnodes_count_p1)
+        p1_right_copy = self._outer_right_copy(xo_point_p1 + subnodes_count_p1)
 
         offspring.extend(p1_left_copy).extend(p2_subtree_copy).extend(p1_right_copy)
         return offspring
 
-    @abstractmethod
-    def mutation(self):
+    def mutation(self, tset, fset):
         offspring = Tree()
 
-        mut_point = choice(p1.size)
+        mut_point = choice(self.size)
         subnodes_count = self._count_subtree_nodes(mut_point)
 
         left_copy = self._outer_left_copy(mut_point)

@@ -1,24 +1,23 @@
-from core.population import ProgramPopulation, TeamPopulation
-from numpy import mean
-from symbionts import Team
+from agents.tpg.core.population import ProgramPopulation, TeamPopulation
+from agents.tpg.core.symbionts import Team
+
+from numpy import median
+import numpy as np
+
 
 class TPGAgent:
 
-    def __init__(self, game_env):
-        data = game_env.get_screen()
+    def __init__(self, action_set_size, functional_set, terminal_set):
         action_set = game_env.actions()
 
-        self.program_population = ProgramPopulation.init_pop(data, action_set)
-        self.team_population = TeamPopulation().init_pop(program_population)
+        self.program_population = ProgramPopulation().init_pop(action_set_size, functional_set, terminal_set)
+        self.team_population = TeamPopulation().init_pop(self.program_population)
 
     def evaluate_team_population(self, game_env, rounds = 3):
         inpt = game_env.get_screen()
         # for each team...
         #    do a three round in game env
         #    get screen, execute action, check if finished
-
-        conversion = np.array([255**2, 255, 1], dtype=np.float32)
-        conversion = conversion / (conversion.sum() / 2)
 
         for team in self.team_population:
             game_env.reset()
@@ -32,7 +31,7 @@ class TPGAgent:
                     if not game_env.is_finished():
                         fitness += 1
                 fitnesses.append(fitness)
-            team.fitness = mean(fitnesses)
+            team.fitness = median(fitnesses)
 
     @property
     def fittest(self):
@@ -54,7 +53,7 @@ class TPGAgent:
     def variate_program_population(self):
         self.program_population = self.program_population.purge()
         for i in range(len(self.program_population), self.program_population.size):
-            
+            pass
 
     def evolve(self, num_gens=90):
         for gen in range(num_gens):
@@ -64,3 +63,12 @@ class TPGAgent:
 
     def act(self):
         return self.fittest.act()  # returns the index to some action
+
+    def save(self, game_environment, filename):
+        data = {}
+        for attr in dir(game_environment.game):
+            pass
+
+        with open(filename, mode='wb') as f:
+            pass
+
