@@ -16,12 +16,12 @@ class Tree(list):
 
     def __str__(self):
         output = '['
-        for i in range(len(self)-1):
+        for i in range(len(self)):
             output = output + self[i].__str__() + ', '
         #return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
         return output[:-2] + ']'
 
-    def grow(self, functional_set, terminal_set, min_depth=4, max_depth=6):
+    def grow(self, functional_set, terminal_set, max_depth=6):
         if type(functional_set) is not list:
             raise TypeError("functional set must be a list")
         elif len(functional_set) == 0:
@@ -36,36 +36,51 @@ class Tree(list):
             depth = stack.pop()
             if depth == max_depth:
                 self.append(choice(terminal_set))
-            elif depth < min_depth:
-                self.append(choice(functional_set))
-            elif random() < 0.5:
-                self.append(choice(terminal_set))
-            else:
-                self.append(choice(functional_set))   
+            elif depth < max_depth:
+                if random() < 0.5:
+                    self.append(choice(terminal_set))
+                else:
+                    self.append(choice(functional_set))
             for _ in range(self[-1].arity):
                 stack.append(depth + 1)
-
-        self.append(choice(terminal_set))  # what the hack
         return self
 
-    def rgrow(self, functional_set, terminal_set, max_depth=6, current_depth=0):
+    def rgrow(self, functional_set, terminal_set,
+              max_depth=6, current_depth=0):
 
-        if current_depth == max_depth:
-            self.append(choice(terminal_set))
-        else:
+        if type(functional_set) is not list:
+            raise TypeError("functional set must be a list")
+        elif len(functional_set) == 0:
+            raise ValueError("cannot use empty functional set")
+        elif type(terminal_set) is not list:
+            raise TypeError("terminal set must be a list")
+        elif len(terminal_set) == 0:
+            raise ValueError("cannot use empty terminal set")
+
+        if current_depth < max_depth:
             if random() < 0.5:
-                self.append(choice(functional_set))
-            else:
                 self.append(choice(terminal_set))
-
+            else:
+                self.append(choice(functional_set))
+        elif current_depth == max_depth:
+            self.append(choice(terminal_set))
         for _ in range(self[-1].arity):
-            self.rgrow(functional_set, terminal_set, max_depth, current_depth+1)
-
+            self.rfull(functional_set, terminal_set,
+                       max_depth, current_depth + 1)
         return self
 
     def full(self, functional_set, terminal_set, full_depth=6):
         # data_dim: dimensionality of data
         # max_depth: maximum height of tree
+        if type(functional_set) is not list:
+            raise TypeError("functional set must be a list")
+        elif len(functional_set) == 0:
+            raise ValueError("cannot use empty functional set")
+        elif type(terminal_set) is not list:
+            raise TypeError("terminal set must be a list")
+        elif len(terminal_set) == 0:
+            raise ValueError("cannot use empty terminal set")
+
         stack = [0]
         while len(stack) != 0:
             depth = stack.pop()
@@ -76,20 +91,30 @@ class Tree(list):
                 print('depth < full_depth')
             for _ in range(self[-1].arity):
                 stack.append(depth + 1)
-        self.append(choice(terminal_set))  # what the hack
         return self
 
     def rfull(self, functional_set, terminal_set, full_depth=6, current_depth=0):
         """
         Recursive form of full function. Use this one for stack calls < 1000.
         """
+        if type(functional_set) is not list:
+            raise TypeError("functional set must be a list")
+        elif len(functional_set) == 0:
+            raise ValueError("cannot use empty functional set")
+        elif type(terminal_set) is not list:
+            raise TypeError("terminal set must be a list")
+        elif len(terminal_set) == 0:
+            raise ValueError("cannot use empty terminal set")
+
+        #print(current_depth)
         if current_depth == full_depth:
             self.append(choice(terminal_set))
         elif current_depth < full_depth:
             self.append(choice(functional_set))
+
         for _ in range(self[-1].arity):
             self.rfull(functional_set, terminal_set, full_depth, current_depth+1)
-        return self
+        return self  # base case if arity is = 0
 
 
     @staticmethod
@@ -159,6 +184,18 @@ class Tree(list):
     def output(self, data):
         tg = self._get_lazy_task(data)
         return tg.compute()
+
+    def output_from(self, data, idx=0):
+        node = self[idx]
+        if type(node) is InputNode:
+            return node(data)
+        else:
+            args = []
+            for i in range(node.arity):
+                idx +=1
+                args.append(self.output_from(data, idx))
+            return node(args)
+
 
     # https://github.com/DEAP/deap/(...)/gp.py#L1119
     # for plotting with networkx

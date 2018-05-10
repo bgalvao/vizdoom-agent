@@ -39,19 +39,19 @@ class ProgramPopulation(Population):
             (hex(id(self)), {'pop_size': self.pop_size,
                              'xo_rate': self.xo_rate}.__str__())
 
-    def init_pop(self, action_set_size, functional_set, terminal_set, min_depth=4, max_depth=6):
+    def init_pop(self, action_set_size, functional_set, terminal_set, max_depth=6):
         """
         :param :
         """
 
         # ramped half-half
-        indivs_per_depth = self.pop_size / (max_depth - min_depth + 1)
-        remaining_indivs = self.pop_size % (max_depth - min_depth + 1)
+        indivs_per_depth = self.pop_size / (max_depth)
+        remaining_indivs = self.pop_size % (max_depth)
 
         grow_indivs = int(np.floor(indivs_per_depth / 2))
         full_indivs = int(np.ceil(indivs_per_depth / 2))
 
-        for depth in range(min_depth, max_depth + 1):
+        for depth in range(0, max_depth + 1):
             if depth == max_depth:
                 grow_indivs = int(
                     np.floor((indivs_per_depth + remaining_indivs) / 2.0))
@@ -63,8 +63,7 @@ class ProgramPopulation(Population):
                        for _ in range(full_indivs)]
 
             grownies = [Program(choice(action_set_size))
-                       .grow(functional_set, terminal_set, min_depth=depth,
-                        max_depth=max_depth)
+                       .rgrow(functional_set, terminal_set, max_depth=depth)
                         for _ in range(grow_indivs)]
 
             self.extend(fullies)

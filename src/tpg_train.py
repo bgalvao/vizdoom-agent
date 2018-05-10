@@ -16,9 +16,11 @@ if __name__ == '__main__':
 
     # initalize functional and terminal sets
     fset = fset()
-    sample_data = np.random.rand(35, 40).flatten()
+
+    sample_data = np.random.rand(3).flatten()
+    print(sample_data)
+
     tset = tset(sample_data)
 
     print('initializing agent...')
     tpg_agent = TPGAgent(10, fset, tset)
-    print('done')

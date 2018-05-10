@@ -28,7 +28,7 @@ class InputNode(Node):
         return data[self.index]
 
     def __str__(self):
-        return 'InputNode(%s)' % (self.index)
+        return 'InputNode(X%s)' % (self.index)
 
     def graph_str(self):
         return 'X' + self.index
@@ -42,7 +42,7 @@ class OpNode(Node):
 
     def __call__(self, args):
         if self.arity == len(args):
-            return delayed(self.op(*args))
+            return self.op(*args)
         else:
             raise RuntimeError('arity of this node ({}) does not match \
                                 #args passed ({})'\
