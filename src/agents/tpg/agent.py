@@ -31,24 +31,32 @@ class TPGAgent:
                                .init_pop(self.program_population)
 
     def evaluate_team_population(self, game_env, rounds = 3):
-        inpt = game_env.get_screen()
         # for each team...
         #    do a three round in game env
         #    get screen, execute action, check if finished
-
+        tctr = 1
         for team in self.team_population:
             game_env.reset()
-            print('evaluating team', hex(id(team)))
+            inpt = game_env.get_screen().flatten()
+            print('evaluating team {} @{}', tctr, hex(id(team)))
             for ronda in range(rounds):
+                print(':::: playing round', ronda+1)
                 fitness = 0  # number of frames
-                fitnesses = []
+                scores = []
+
+                inpt = game_env.get_screen().flatten()
                 while not game_env.is_finished():
-                    inpt = np.dot(game_env.get_screen(), conversion)
                     team.act(inpt)
-                    if not game_env.is_finished():
-                        fitness += 1
-                fitnesses.append(fitness)
-            team.fitness = median(fitnesses)
+                score = game_env.game.get_total_reward()
+                scores.append(score)
+                print(':::::: score >>', score)
+
+            scores = np.array(scores)
+            team.fitness = median(scores)  # less sensitive to outliers
+            print(':: team results > median %.1f :: min %.1f :: max %.1f' % (scores.median(), scores.min(), scores.max()))
+            tctr += 1
+
+            print
 
     @property
     def fittest(self):
