@@ -14,12 +14,12 @@ class Tree(list):
         list.__init__(self, *args)
         self.address = hex(id(self))
 
-    def __str__(self):
-        output = '['
-        for i in range(len(self)):
-            output = output + self[i].__str__() + ', '
-        #return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
-        return output[:-2] + ']'
+    # def __str__(self):
+    #     output = '['
+    #     for i in range(len(self)):
+    #         output = output + self[i].__str__() + ', '
+    #     #return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
+    #     return output[:-2] + ']'
 
     def grow(self, functional_set, terminal_set, max_depth=6):
         if type(functional_set) is not list:

@@ -31,6 +31,9 @@ class Team(list):  # really like a typical GA individual
         list.__init__(self, *args)
         self.fitness = 0
 
+    #def __str__(self):
+    #    return '<Team @%s>' % str(hex(id(self)))
+
     def get_fitness(self):
         return self.get_fitness
 
@@ -39,18 +42,21 @@ class Team(list):  # really like a typical GA individual
         return len(self)
 
     def act(self, inpt, idx=0, visited_teams=[]):
+        # print('\nteam @%s with programs' % hex(id(self)))
+        # for p in self:
+        #     print(':: %s :: %d' % (hex(id(p)), p.action))
+        
         current_team = self
         visited_teams.append(current_team)
+        #print([hex(id(p)) for p in visited_teams])
         bids = {program.bid(inpt): program.action for program in current_team}
         
-        # TODO ainda não assignei teams aos programas...
-        
-        #print('Team.act :: bids ::', bids)
+        print('Team {} :: bids :: {}'.format(hex(id(self)), bids))
         for i in reversed(sorted(bids)):
             #print(i, bids[i])
             action = bids[i]
             if type(action) == Team and action not in visited_teams:
-                self.act(inpt, idx+1, visited_teams)
+                action.act(inpt, idx+1, visited_teams)
             else:
                 return action
 

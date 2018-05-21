@@ -47,16 +47,17 @@ class TPGAgent:
 
                 inpt = game_env.get_screen().flatten()
                 while not game_env.is_finished():
+                    print('picking action')
                     game_env.next_state(team.act(inpt))  # make_action is specific to vizdoom
                 score = game_env.game.get_total_reward()
                 scores.append(score)
+                break
 
             scores = np.array(scores)
             team.fitness = median(scores)  # less sensitive to outliers
             print(':: team results > median %.1f :: min %.1f :: max %.1f' % (np.median(scores), scores.min(), scores.max()))
             tctr += 1
-
-            print
+            break
 
     @property
     def fittest(self):

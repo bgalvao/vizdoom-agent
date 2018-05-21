@@ -27,8 +27,8 @@ class InputNode(Node):
     def __call__(self, data):
         return data[self.index]
 
-    def __str__(self):
-        return 'InputNode(X%s)' % (self.index)
+    #def __str__(self):
+    #    return 'InputNode(X%s)' % (self.index)
 
     def graph_str(self):
         return 'X' + self.index
@@ -48,8 +48,8 @@ class OpNode(Node):
                                 #args passed ({})'\
                                 .format(self.arity, len(args)))
 
-    def __str__(self):
-        return 'OpNode(%s)' % (self.op.__str__().split()[1])
+    #def __str__(self):
+    #    return 'OpNode(%s)' % (self.op.__str__().split()[1])
 
-    def graph_str(self):
-        return self.op.__str__().split()[1]
+    #def graph_str(self):
+    #    return self.op.__str__().split()[1]

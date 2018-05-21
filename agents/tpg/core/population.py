@@ -34,10 +34,10 @@ class ProgramPopulation(Population):
     def __init__(self, pop_size=50, xo_rate=0.1):
         super(ProgramPopulation, self).__init__(pop_size, xo_rate)
 
-    def __str__(self):
-        return 'ProgramPopulation @ %s :: %s' % \
-            (hex(id(self)), {'pop_size': self.pop_size,
-                             'xo_rate': self.xo_rate}.__str__())
+    # def __str__(self):
+    #     return 'ProgramPopulation @ %s :: %s' % \
+    #         (hex(id(self)), {'pop_size': self.pop_size,
+    #                          'xo_rate': self.xo_rate}.__str__())
 
     def init_pop(self, action_set_size, functional_set, terminal_set, max_depth=6):
         """
@@ -90,13 +90,34 @@ class TeamPopulation(Population):
         self.max_team_size = max_team_size
         self.cutoff = cutoff
 
-    def __str__(self):
-        return 'TeamPopulation @ %s :: %s' % \
-            (hex(id(self)), {'pop_size': self.pop_size,
-                             'xo_rate': self.xo_rate,
-                             'cutoff': self.cutoff,
-                             'min_team_size': self.min_team_size,
-                             'max_team_size': self.max_team_size}.__str__()) 
+    # def __str__(self):
+    #     return 'TeamPopulation @ %s :: %s' % \
+    #         (hex(id(self)), {'pop_size': self.pop_size,
+    #                          'xo_rate': self.xo_rate,
+    #                          'cutoff': self.cutoff,
+    #                          'min_team_size': self.min_team_size,
+    #                          'max_team_size': self.max_team_size}.__str__()) 
+
+    def gen_team(self, program_pop, team_size, min_action_set_size=2):
+        if team_size < 2:
+            raise ValueError('team_size has to be at least 2')
+        elif team_size < min_action_set_size:
+            raise ValueError('team_size has to be at least equal to min_action_set_size')
+        
+        team = []
+        action_set = lambda t: set([p.action for p in t])
+        action_set_size = lambda t: len(action_set(t))
+
+        for i in range(team_size):
+            next_team = choice(program_pop)
+
+            if action_set_size(team) < min_action_set_size:
+                ast = action_set(team)
+                while(next_team.action in ast):
+                    next_team = choice(program_pop)
+            
+            team.append(next_team)
+        return team
 
     def init_pop(self, program_population):
         """
@@ -108,17 +129,15 @@ class TeamPopulation(Population):
         remaining_teams = self.pop_size % groups
         last_group_size = group_size + remaining_teams
 
-        team = [choice(program_population) for i in range(2)]
-        team = Team(team)
-
         for i in range(groups - 1):
             team_size = self.min_team_size + i
-            self.extend([Team([choice(program_population) for _ in range(team_size)])
+            self.extend([Team(self.gen_team(program_population, team_size))
                          for _ in range(group_size)])
 
-        self.extend([Team([choice(program_population) for _ in range(self.max_team_size)])
+        self.extend([Team(self.gen_team(program_population, self.max_team_size))
                      for _ in range(last_group_size)])
         return self
+
 
     def select(self, pooling_size=6):
         """

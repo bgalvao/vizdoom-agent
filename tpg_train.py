@@ -21,6 +21,4 @@ if __name__ == '__main__':
     tset = tset(sample_data)
     tpg_agent = TPGAgent(len(env.atomic_actions), fset, tset)
 
-    print(tpg_agent.team_population)
-
     tpg_agent.evaluate_team_population(env)
