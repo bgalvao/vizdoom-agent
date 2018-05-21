@@ -32,7 +32,7 @@ class DoomEnv:
         """
         self.game = DoomGame()
         self.game.load_config(scenario(scenario_index))
-        self.game.set_window_visible(False)
+        self.game.set_window_visible(True)
         self.game.set_mode(Mode.PLAYER)
         if rgb_channels is True:
             self.game.set_screen_format(ScreenFormat.RGB24)
@@ -42,8 +42,17 @@ class DoomEnv:
         self.game.init()
 
         self.n_actions = self.game.get_available_buttons_size()
+        self.atomic_actions = {i: list(row) for i, row in 
+                              enumerate(np.identity(self.n_actions,
+                              dtype=np.int32))}
         self.down_res = resolution
         print("Doom initialized")
+
+    def next_state(self, action):
+        self.game.make_action(self.atomic_actions[action])
+
+    def atomic_actions(self):
+        np.identity(n_actions)
 
     def combo_actions(self):
         n = self.n_actions

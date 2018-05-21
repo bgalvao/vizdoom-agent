@@ -5,7 +5,7 @@ from numpy.random import choice
 
 from agents.tpg.core.symbionts import Program, Team
 from agents.tpg.core.tree import Tree
-
+from math import floor
 
 class Population(list):
 
@@ -35,7 +35,7 @@ class ProgramPopulation(Population):
         super(ProgramPopulation, self).__init__(pop_size, xo_rate)
 
     def __str__(self):
-        return 'ProgramPopulation @ %s\n%s' % \
+        return 'ProgramPopulation @ %s :: %s' % \
             (hex(id(self)), {'pop_size': self.pop_size,
                              'xo_rate': self.xo_rate}.__str__())
 
@@ -90,13 +90,35 @@ class TeamPopulation(Population):
         self.max_team_size = max_team_size
         self.cutoff = cutoff
 
-    def init_pop(self, program_population, team_size=15):
+    def __str__(self):
+        return 'TeamPopulation @ %s :: %s' % \
+            (hex(id(self)), {'pop_size': self.pop_size,
+                             'xo_rate': self.xo_rate,
+                             'cutoff': self.cutoff,
+                             'min_team_size': self.min_team_size,
+                             'max_team_size': self.max_team_size}.__str__()) 
+
+    def init_pop(self, program_population):
         """
         :param ProgramPopulation program_population: list of Program's
         :param int team_size: size of the team. Fixed length for the evolutionary process.
         """
-        self.extend([Team().extend(choice(program_population, team_size))
-                     for i in range(self.pop_size)])
+        groups = self.max_team_size - self.min_team_size + 1
+        group_size = floor(self.pop_size / groups)
+        remaining_teams = self.pop_size % groups
+        last_group_size = group_size + remaining_teams
+
+        team = [choice(program_population) for i in range(2)]
+        team = Team(team)
+
+        for i in range(groups - 1):
+            team_size = self.min_team_size + i
+            self.extend([Team([choice(program_population) for _ in range(team_size)])
+                         for _ in range(group_size)])
+
+        self.extend([Team([choice(program_population) for _ in range(self.max_team_size)])
+                     for _ in range(last_group_size)])
+        return self
 
     def select(self, pooling_size=6):
         """

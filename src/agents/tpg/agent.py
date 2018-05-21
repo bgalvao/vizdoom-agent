@@ -38,22 +38,22 @@ class TPGAgent:
         for team in self.team_population:
             game_env.reset()
             inpt = game_env.get_screen().flatten()
-            print('evaluating team {} @{}', tctr, hex(id(team)))
+            print('evaluating team {} @{}'.format(tctr, hex(id(team))))
             for ronda in range(rounds):
                 print(':::: playing round', ronda+1)
+                game_env.reset()
                 fitness = 0  # number of frames
                 scores = []
 
                 inpt = game_env.get_screen().flatten()
                 while not game_env.is_finished():
-                    team.act(inpt)
+                    game_env.next_state(team.act(inpt))  # make_action is specific to vizdoom
                 score = game_env.game.get_total_reward()
                 scores.append(score)
-                print(':::::: score >>', score)
 
             scores = np.array(scores)
             team.fitness = median(scores)  # less sensitive to outliers
-            print(':: team results > median %.1f :: min %.1f :: max %.1f' % (scores.median(), scores.min(), scores.max()))
+            print(':: team results > median %.1f :: min %.1f :: max %.1f' % (np.median(scores), scores.min(), scores.max()))
             tctr += 1
 
             print

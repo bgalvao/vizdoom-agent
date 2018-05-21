@@ -182,10 +182,16 @@ class Tree(list):
             return node(args)
 
     def output(self, data):
+        """
+        This is meant to use dask.
+        """
         tg = self._get_lazy_task(data)
         return tg.compute()
 
-    def output_from(self, data, idx=0):
+    def routput(self, data, idx=0):
+        """
+        This is a raw recursive implementation.
+        """
         node = self[idx]
         if type(node) is InputNode:
             return node(data)
@@ -193,7 +199,7 @@ class Tree(list):
             args = []
             for i in range(node.arity):
                 idx +=1
-                args.append(self.output_from(data, idx))
+                args.append(self.routput(data, idx))
             return node(args)
 
 

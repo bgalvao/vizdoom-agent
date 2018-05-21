@@ -18,9 +18,8 @@ class Program(Tree):
         self.action = action  # this may be an atomic action or a team!
         self.referenced = False
 
-    @property
     def bid(self, data):
-        return self.output  # this is a column to be reduced :o
+        return self.routput(data)
 
     def reproduce(self):
         pass
@@ -40,15 +39,20 @@ class Team(list):  # really like a typical GA individual
         return len(self)
 
     def act(self, inpt, idx=0, visited_teams=[]):
-        current_team = self[idx]
+        current_team = self
         visited_teams.append(current_team)
-        bids = {program.bid(inpt): program.action for program in current_team.index}
+        bids = {program.bid(inpt): program.action for program in current_team}
+        
+        # TODO ainda não assignei teams aos programas...
+        
+        #print('Team.act :: bids ::', bids)
         for i in reversed(sorted(bids)):
-            p = bids[i]
-            if type(p.action) == Team:
+            #print(i, bids[i])
+            action = bids[i]
+            if type(action) == Team and action not in visited_teams:
                 self.act(inpt, idx+1, visited_teams)
             else:
-                return p.action
+                return action
 
     def is_sufficient(self):
         # returns true if it has at least two atomic actions

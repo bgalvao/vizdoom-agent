@@ -1,4 +1,4 @@
-#from envs.doom import DoomEnv
+from envs.doom import DoomEnv
 from agents.tpg.agent import TPGAgent
 from agents.tpg.core.node_sets import fset, tset
 
@@ -12,15 +12,15 @@ from agents.tpg.core.symbionts import Program
 if __name__ == '__main__':
 
     # start environment with single channel
-    #env = DoomEnv(0, rgb_channels=False)
-
+    env = DoomEnv(2, rgb_channels=False)
+    print(env.atomic_actions)
+    
     # initalize functional and terminal sets
     fset = fset()
-
-    sample_data = np.random.rand(3).flatten()
-    print(sample_data)
-
+    sample_data = env.get_screen().flatten()
     tset = tset(sample_data)
+    tpg_agent = TPGAgent(len(env.atomic_actions), fset, tset)
 
-    print('initializing agent...')
-    tpg_agent = TPGAgent(10, fset, tset)
+    print(tpg_agent.team_population)
+
+    tpg_agent.evaluate_team_population(env)
