@@ -20,5 +20,4 @@ if __name__ == '__main__':
     sample_data = env.get_screen().flatten()
     tset = tset(sample_data)
     tpg_agent = TPGAgent(len(env.atomic_actions), fset, tset)
-
-    tpg_agent.evaluate_team_population(env)
+    tpg_agent.evolve(game_env=env, num_gens=10)

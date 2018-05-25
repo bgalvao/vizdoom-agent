@@ -9,8 +9,8 @@ from math import floor
 
 class Population(list):
 
-    def __init__(self, pop_size=50, xo_rate=.1, *args):
-        list.__init__(self, *args)
+    def __init__(self, *args, pop_size=50, xo_rate=.1):
+        super(Population, self).__init__(*args)
         self.pop_size = pop_size
         self.xo_rate = xo_rate
 
@@ -31,13 +31,9 @@ class Population(list):
 
 class ProgramPopulation(Population):
 
-    def __init__(self, pop_size=50, xo_rate=0.1):
-        super(ProgramPopulation, self).__init__(pop_size, xo_rate)
-
-    # def __str__(self):
-    #     return 'ProgramPopulation @ %s :: %s' % \
-    #         (hex(id(self)), {'pop_size': self.pop_size,
-    #                          'xo_rate': self.xo_rate}.__str__())
+    def __init__(self, elements, pop_size=50, xo_rate=0.1):
+        super(ProgramPopulation, self).__init__(elements, pop_size=pop_size,
+                                                xo_rate=xo_rate)
 
     def init_pop(self, action_set_size, functional_set, terminal_set, max_depth=6):
         """
@@ -69,14 +65,6 @@ class ProgramPopulation(Population):
             self.extend(fullies)
             self.extend(grownies)
 
-        return self
-
-    def print_indivs(self):
-        for i in self.pop:
-            print(i)
-
-    def purge(self, team_population):
-        return [member for member in team for team in team_population]
 
     def variate(self, parameter_list):
         pass
@@ -85,18 +73,10 @@ class ProgramPopulation(Population):
 class TeamPopulation(Population):
 
     def __init__(self, pop_size=50, xo_rate=0.1, cutoff=10, min_team_size=2, max_team_size=5):
-        super(TeamPopulation, self).__init__(pop_size, xo_rate)
+        super(TeamPopulation, self).__init__(pop_size=pop_size, xo_rate=xo_rate)
         self.min_team_size = min_team_size
         self.max_team_size = max_team_size
         self.cutoff = cutoff
-
-    # def __str__(self):
-    #     return 'TeamPopulation @ %s :: %s' % \
-    #         (hex(id(self)), {'pop_size': self.pop_size,
-    #                          'xo_rate': self.xo_rate,
-    #                          'cutoff': self.cutoff,
-    #                          'min_team_size': self.min_team_size,
-    #                          'max_team_size': self.max_team_size}.__str__()) 
 
     def gen_team(self, program_pop, team_size, min_action_set_size=2):
         if team_size < 2:
@@ -109,14 +89,14 @@ class TeamPopulation(Population):
         action_set_size = lambda t: len(action_set(t))
 
         for i in range(team_size):
-            next_team = choice(program_pop)
-
+            next_program = choice(program_pop)
+            
             if action_set_size(team) < min_action_set_size:
                 ast = action_set(team)
-                while(next_team.action in ast):
-                    next_team = choice(program_pop)
+                while(next_program.action in ast):
+                    next_program = choice(program_pop)
             
-            team.append(next_team)
+            team.append(next_program)
         return team
 
     def init_pop(self, program_population):
@@ -136,7 +116,6 @@ class TeamPopulation(Population):
 
         self.extend([Team(self.gen_team(program_population, self.max_team_size))
                      for _ in range(last_group_size)])
-        return self
 
 
     def select(self, pooling_size=6):
@@ -144,20 +123,25 @@ class TeamPopulation(Population):
         For now, just tournament selection
         """
         pool = [choice(self) for i in range(pooling_size)]
-        return max(pool, key=get_fitness)
+        return max(pool, key=Team.get_fitness)
 
-    def reproduce(self):
+    def reproduce(self, program_population):
         p1 = self.select()
         if np.random.rand() < self.xo_rate:
             p2 = self.select()
-            return crossover(p1, p2)
+            return p1.crossover_with(p2)
         else:
-            return mutation(p1)
+            return p1.mutate(program_population)
 
-    def variate(self, elites):
+    def variate(self, program_population):
         new_pop = TeamPopulation()
-        new_pop.extend([self.reproduce for i in range(len(self))])
+        new_pop.extend([self.reproduce(program_population) for i in range(len(self))])
         return new_pop
+
+    def purge(self, program_population):
+        # collect programs present in / referenced by this program population
+        t = (program_population.pop_size, program_population.xo_rate)
+        return ProgramPopulation([p for team in self for p in team], t[0], t[1])
 
 
 if __name__ == '__main__':

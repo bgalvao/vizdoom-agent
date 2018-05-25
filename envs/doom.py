@@ -32,7 +32,7 @@ class DoomEnv:
         """
         self.game = DoomGame()
         self.game.load_config(scenario(scenario_index))
-        self.game.set_window_visible(True)
+        self.game.set_window_visible(False)
         self.game.set_mode(Mode.PLAYER)
         if rgb_channels is True:
             self.game.set_screen_format(ScreenFormat.RGB24)

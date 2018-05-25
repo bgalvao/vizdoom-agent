@@ -11,7 +11,8 @@ from random import random
 class Tree(list):
 
     def __init__(self, *args):
-        list.__init__(self, *args)
+        #list.__init__(self, *args)
+        super(Tree, self).__init__(*args)
         self.address = hex(id(self))
 
     # def __str__(self):

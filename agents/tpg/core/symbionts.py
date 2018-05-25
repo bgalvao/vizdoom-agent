@@ -28,14 +28,11 @@ class Program(Tree):
 class Team(list):  # really like a typical GA individual
 
     def __init__(self, *args):
-        list.__init__(self, *args)
+        super(Team, self).__init__(*args)
         self.fitness = 0
 
-    #def __str__(self):
-    #    return '<Team @%s>' % str(hex(id(self)))
-
     def get_fitness(self):
-        return self.get_fitness
+        return self.fitness
 
     @property
     def size(self):
@@ -51,7 +48,7 @@ class Team(list):  # really like a typical GA individual
         #print([hex(id(p)) for p in visited_teams])
         bids = {program.bid(inpt): program.action for program in current_team}
         
-        print('Team {} :: bids :: {}'.format(hex(id(self)), bids))
+        #print('Team {} :: bids :: {}'.format(hex(id(self)), bids))
         for i in reversed(sorted(bids)):
             #print(i, bids[i])
             action = bids[i]
@@ -75,18 +72,22 @@ class Team(list):  # really like a typical GA individual
         p1_left, p1_right = p1[:rcp1], p1[rcp1:]
         p2_left, p2_right = p2[:rcp2], p2[rcp2:]
 
-        offspring_1 = Team().extend(p1_left).extend(p2_right)
-        offspring_2 = Team().extend(p2_left).extend(p1_right)
+        offspring_1 = Team()
+        offspring_2 = Team()
+
+        offspring_1.extend(p1_left); offspring_1.extend(p2_right)
+        offspring_2.extend(p2_left); offspring_2.extend(p1_right)
 
         return offspring_1, offspring_2
 
     def mutate(self, program_population):
         # random mutation point
         rmp = randint(len(self))
+        offspring = Team()
         if random() > 0.5:
-            offspring = Team().extend(self[:rmp])
+            offspring.extend(self[:rmp])
         else:
-            offspring = Team().extend(self[rmp:])
+            offspring.extend(self[rmp:])
         size = len(self) - rmp
         appendage = choice(program_population, size)
         offspring.extend(appendage)
