@@ -1,10 +1,11 @@
 FROM continuumio/miniconda3
 RUN conda update -n base conda
 # pytorch
-RUN conda install pytorch-cpu torchvision pytorch cuda90 -c pytorch
+#RUN conda install pytorch-cpu torchvision pytorch cuda90 -c pytorch
 
 # other
-RUN conda install bokeh pip scikit-image pylint -c conda-forge
+RUN conda install bokeh pip scikit-image -c conda-forge
+#RUN conda install pylint -c conda-forge
 
 # vizdoom - zdoom dependencies
 RUN apt update

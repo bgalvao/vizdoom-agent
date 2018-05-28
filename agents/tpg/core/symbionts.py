@@ -11,15 +11,37 @@ from numpy.random import randint, choice, random, seed
 
 #rgb = 65536 * r + 256 * g + b;
 
-class Program(Tree):
+class Program():
     
     def __init__(self, action):
-        super(Program, self).__init__()
+        self.tree = Tree()
         self.action = action  # this may be an atomic action or a team!
-        self.referenced = False
+        self.in_team_pop = False  # a flag
+
+    # wrapper
+    def rgrow(self, functional_set, terminal_set, max_depth=6):
+        self.tree.rgrow(functional_set, terminal_set, max_depth)
+        return self
+
+    # wrapper
+    def rfull(self, functional_set, terminal_set, full_depth=6):
+        self.tree.rfull(functional_set, terminal_set, full_depth)
+        return self
+
+    def crossover_with(self, other_program):
+        offspring = Program(self.action)
+        offspring.tree = self.tree.crossover_with(other_program.tree)
+        if random > 0.5:
+            offspring.action = other_program.action
+        return offspring
+
+    def mutate(self, tset, fset):
+        offspring = Program(self.action)
+        offspring.tree = self.tree.mutate(tset, fset)
+        return offspring
 
     def bid(self, data):
-        return self.routput(data)
+        return self.tree.routput(data)
 
     def reproduce(self):
         pass
@@ -61,10 +83,10 @@ class Team(list):  # really like a typical GA individual
         # returns true if it has at least two atomic actions
         return len(set([p.action for p in self if type(p.action) is not Team])) >= 2
 
-    def crossover_with(self, daddy_team):
+    def crossover_with(self, other_team):
         # get unique elements...
         p1 = self
-        p2 = daddy_team
+        p2 = other_team
         # random crossover points
         rcp1 = randint(len(p1))
         rcp2 = randint(len(p2))
@@ -73,12 +95,17 @@ class Team(list):  # really like a typical GA individual
         p2_left, p2_right = p2[:rcp2], p2[rcp2:]
 
         offspring_1 = Team()
-        offspring_2 = Team()
+        #offspring_2 = Team()
 
         offspring_1.extend(p1_left); offspring_1.extend(p2_right)
-        offspring_2.extend(p2_left); offspring_2.extend(p1_right)
+        #offspring_2.extend(p2_left); offspring_2.extend(p1_right)
 
-        return offspring_1, offspring_2
+        # DANGER ZONE - as in, writing in instances of other classes other
+        # than this one...
+        for program in offspring_1:
+            program.in_team = True
+
+        return offspring_1# offspring_2
 
     def mutate(self, program_population):
         # random mutation point
@@ -89,10 +116,16 @@ class Team(list):  # really like a typical GA individual
         else:
             offspring.extend(self[rmp:])
         size = len(self) - rmp
-        appendage = choice(program_population, size)
+        appendage = choice(program_population.members, size)
         offspring.extend(appendage)
         while not offspring.is_sufficient():
-            offspring.append(choice(program_population))
+            offspring.append(choice(program_population.members))
+
+        # DANGER ZONE - as in, writing in instances of other classes other
+        # than this one...
+        for program in offspring:
+            program.in_team = True
+
         return offspring
 
 

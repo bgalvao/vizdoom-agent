@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # start environment with single channel
     env = DoomEnv(2, rgb_channels=False)
     print(env.atomic_actions)
-    
+
     # initalize functional and terminal sets
     fset = fset()
     sample_data = env.get_screen().flatten()

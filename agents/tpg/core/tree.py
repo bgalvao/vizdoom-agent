@@ -10,17 +10,10 @@ from random import random
 # any identical code to deap is no coincidence at all.
 class Tree(list):
 
+    # dis
     def __init__(self, *args):
-        #list.__init__(self, *args)
         super(Tree, self).__init__(*args)
         self.address = hex(id(self))
-
-    # def __str__(self):
-    #     output = '['
-    #     for i in range(len(self)):
-    #         output = output + self[i].__str__() + ', '
-    #     #return "Tree @ %s\n%s\n" % (self.address, self.__repr__())
-    #     return output[:-2] + ']'
 
     def grow(self, functional_set, terminal_set, max_depth=6):
         if type(functional_set) is not list:
@@ -221,7 +214,7 @@ class Tree(list):
                 stack.pop()
         return nodes, edges, labels
 
-    def crossover(self, p2):
+    def crossover_with(self, p2):
         offspring = Tree()
         
         xo_point_p1 = choice(self.size)
@@ -234,10 +227,12 @@ class Tree(list):
         p2_subtree_copy = p2._subtree_copy(xo_point_p2, subnodes_count_p2)
         p1_right_copy = self._outer_right_copy(xo_point_p1 + subnodes_count_p1)
 
-        offspring.extend(p1_left_copy).extend(p2_subtree_copy).extend(p1_right_copy)
-        return offspring
+        offspring.extend(p1_left_copy).extend(p2_subtree_copy).extend(
+            p1_right_copy
+        )
+        return offspring  # returns Tree
 
-    def mutation(self, tset, fset):
+    def mutate(self, tset, fset):
         offspring = Tree()
 
         mut_point = choice(self.size)
@@ -245,7 +240,7 @@ class Tree(list):
 
         left_copy = self._outer_left_copy(mut_point)
         right_copy = self._outer_right_copy(mut_point+subnodes_count)
-        mutation = Tree.grow(tset, fset, max_depth=6)
+        mutation = Tree().rgrow(fset, tset, max_depth=6)
 
         offspring.extend(left_copy).extend(mutation).extend(right_copy)
-        return offspring
+        return offspring  # returns Tree
