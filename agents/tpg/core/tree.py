@@ -157,7 +157,7 @@ class Tree(list):
             return 1
         elif type(self[from_node]) == OpNode:
             subtree_node_count = 1  # we're still on the first node
-            for i in self[from_node].arity:
+            for i in range(self[from_node].arity):
                 subtree_node_count += 1
             return subtree_node_count
 
@@ -227,9 +227,9 @@ class Tree(list):
         p2_subtree_copy = p2._subtree_copy(xo_point_p2, subnodes_count_p2)
         p1_right_copy = self._outer_right_copy(xo_point_p1 + subnodes_count_p1)
 
-        offspring.extend(p1_left_copy).extend(p2_subtree_copy).extend(
-            p1_right_copy
-        )
+        offspring.extend(p1_left_copy)
+        offspring.extend(p2_subtree_copy)
+        offspring.extend(p1_right_copy)
         return offspring  # returns Tree
 
     def mutate(self, tset, fset):
@@ -242,5 +242,7 @@ class Tree(list):
         right_copy = self._outer_right_copy(mut_point+subnodes_count)
         mutation = Tree().rgrow(fset, tset, max_depth=6)
 
-        offspring.extend(left_copy).extend(mutation).extend(right_copy)
+        offspring.extend(left_copy)
+        offspring.extend(mutation)
+        offspring.extend(right_copy)
         return offspring  # returns Tree

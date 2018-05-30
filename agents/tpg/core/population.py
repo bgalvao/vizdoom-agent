@@ -188,7 +188,7 @@ class TeamPopulation(Population):
         else:
             return p1.mutate(program_population) # retrieves some new programs
 
-    def variate(self, program_population):
+    def variate(self, program_population, elites=0):
         """
         Generates a new offspring TeamPopulation.
 
@@ -202,8 +202,9 @@ class TeamPopulation(Population):
         offspring : agents.tpg.core.population.TeamPopulation
         """
         children = [self._reproduce(program_population)
-                   for i in range(len(self.members))]
+                   for i in range(len(self.members) - elites)]
         offspring = deepcopy(self)
+        offspring.members = []
         offspring.members.extend(children)
         offspring._refer_programs()
         return offspring

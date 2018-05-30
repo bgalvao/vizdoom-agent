@@ -31,7 +31,7 @@ class Program():
     def crossover_with(self, other_program):
         offspring = Program(self.action)
         offspring.tree = self.tree.crossover_with(other_program.tree)
-        if random > 0.5:
+        if random() > 0.5:
             offspring.action = other_program.action
         return offspring
 

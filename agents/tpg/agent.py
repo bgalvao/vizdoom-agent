@@ -4,6 +4,8 @@ from agents.tpg.core.symbionts import Team
 from numpy import median
 import numpy as np
 
+from time import perf_counter as timer
+
 
 class TPGAgent:
 
@@ -40,7 +42,7 @@ class TPGAgent:
         self.team_population.init_pop(self.program_population)
 
     def evaluate_team_population(self, game_env, rounds = 3):
-        print('>> evaluating teams in game game_environment')
+        print('>> evaluating teams in game environment')
         # for each team...
         #    do a three round in game env
         #    get screen, execute action, check if finished
@@ -57,39 +59,44 @@ class TPGAgent:
                 inpt = game_env.get_screen().flatten()
                 while not game_env.is_finished():
                     #print('picking action')
-                    game_env.next_state(team.act(inpt))  # make_action is specific to vizdoom
+                    game_env.next_state(team.act(inpt))
                 score = game_env.game.get_total_reward()
                 scores.append(score)
                 break
 
             scores = np.array(scores)
             team.fitness = median(scores)  # less sensitive to outliers
-            #print(':: team results > median %.1f :: min %.1f :: max %.1f' % (np.median(scores), scores.min(), scores.max()))
+            # print('>>> team %d results > median %.1f :: min %.1f :: max %.1f' % 
+            #     (tctr, np.median(scores), scores.min(), scores.max())
+            # )
             tctr += 1
             break
 
     @property
     def fittest(self):
-        return max(self.team_population.members, key=get_fitness)
+        return max(self.team_population.members, key=Team.get_fitness)
     
     @property
     def fitness(self):
-        return self.fittest().fitness
+        return self.fittest.fitness
 
-    def variate_team_population(self, program_population, elitism=0):
+    def variate_team_population(self, program_population, elitism=5):
         print('>> variating team population')
         if elitism is 0:
             return self.team_population.variate(program_population)
         else:
-            fresh_pop = sorted(self.team_population.variate(), key=get_fitness)[elitism:]
-            elite_pop = sorted(self.team_population, key=get_fitness)[:elitism]
-            result_pop = elite_pop.extend(fresh_pop)
-            return result_pop
+            elite_pop_members = sorted(self.team_population.members, key=Team.get_fitness)[-elitism:]
+            fresh_pop = self.team_population.variate(program_population, elites=elitism)
+            fresh_pop.members.extend(elite_pop_members)
+            return fresh_pop
 
     def variate_program_population(self, tset, fset, debug=False):
         print('>> variating program population')
         current_pop_size = len(self.program_population.members)
         target_pop_size = self.program_population.pop_size
+        print('>>> inserting %d new programs' % 
+            (target_pop_size - current_pop_size)
+        )
         if debug:
             print(current_pop_size, target_pop_size)
         for _ in range(current_pop_size, target_pop_size):
@@ -98,27 +105,36 @@ class TPGAgent:
 
     def evolve(self, game_env, num_gens=90):
         for gen in range(num_gens):
-
+            print('----------------------------------')
             print('> evolving generation ::', gen + 1)
-
+            # print(len(self.team_population.members),
+            #     len(self.program_population.members))
+            
+            x = timer()
             self.evaluate_team_population(game_env)
-
+            print('::::: %.3fs' % (timer() - x))
+            print('> this agent scores ::', self.fitness)
+            
             # set all reference flags to false
             self.program_population.derefer_from_team_population()
 
             # evolve team population
             # note that here, the programs that are in the new teams
             # will have their ref flags turned to True
+            x = timer()
             self.team_population = self.variate_team_population(
                 self.program_population
             )
+            print('::::: %.3fs' % (timer() - x))
 
             # so now we can purge the program population correctly
             self.program_population.purge()
             # and variate according to the 'winning' programs
+            x = timer()
             self.program_population = self.variate_program_population(
                 self.tset, self.fset
             )
+            print('::::: %.3fs' % (timer() - x))
 
 
     def act(self):
