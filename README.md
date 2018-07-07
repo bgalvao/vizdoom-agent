@@ -17,19 +17,20 @@ put these to the test and multi-task with OpenAI's Universe.
 ## Presentation
 
 All shall be published in a webpage hosted by a branch of this repo.
-Planning on using [`bokeh`](https://bokeh.pydata.org/en/latest/).
+
 
 ## Running this
 
-A [`Dockerfile`](./Dockerfile) is provided, serving as a dependency list as
-well.
+Dockerfiles are in the `/docker` folder and follow mainly what's written in the [vizdoom docker directory](https://github.com/mwydmuch/ViZDoom/tree/master/docker).
+
+So after building it, to run it, run
 
 ```bash
-cd path/to/this/repo
-docker build -t rl .  # build a docker image called "rl"
-docker run -it --rm -v $(pwd):/home/ rl  # terminal access to a container 
-cd home  # where this working directory was mounted to in the container
-# do what you want
+git clone https://gitlab.com/bgalvao/rl.git
+cd rl/docker/vizdoom/
+sudo docker build -t rl .
+cd ../..
+sudo docker run  -ti --net=host -e DISPLAY=${DISPLAY} --privileged --rm -v $(pwd):/home/vizdoom/dev rl
 ```
 
 

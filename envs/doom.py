@@ -9,15 +9,24 @@ import numpy as np
 # get this conda env to get configuration file
 import subprocess
 from os import path
-prefix = subprocess.check_output('which python', shell=True).decode('utf-8')[:-1][:-10]
-suffix = 'lib/python3.6/site-packages/vizdoom/scenarios/'
 
-scenarios_path = prefix + suffix
+# prefix = subprocess.check_output('which python', shell=True).decode('utf-8')[:-1][:-10]
+# suffix = 'lib/python3.6/site-packages/vizdoom/scenarios/'
+# scenarios_path = prefix + suffix
+
+scenarios_path = '../vizdoom/scenarios/'
 scenarios = ['simpler_basic.cfg', 'rocket_basic.cfg', 'basic.cfg']
 
-def scenario(scenario_index):
+def load_scenario(scenario):
     # aka configuration file path
-    return scenarios_path + scenarios[scenario_index]
+    if type(scenario) == int:
+        if scenario < 0 or scenario > 2:
+            raise ValueError('pass and int scenario between 0 and 2')
+        return scenarios_path + scenarios[scenario_index]
+    elif type(scenario) == str:
+        return scenarios_path + scenario
+    else:
+        raise TypeError('Please define a str or int as scenario')
 
 # params
 frame_repeat = 12
@@ -25,14 +34,14 @@ resolution = (30, 45)
 
 class DoomEnv:
 
-    def __init__(self, scenario_index, rgb_channels=False):
+    def __init__(self, scenario, rgb_channels=False):
         """
         :param int scenario_index: index of one of the available scenarios
         :param int screen_format: index of one of the available screen formats
         """
         self.game = DoomGame()
-        self.game.load_config(scenario(scenario_index))
-        self.game.set_window_visible(False)
+        self.game.load_config(load_scenario(scenario))
+        self.game.set_window_visible(True)
         self.game.set_mode(Mode.PLAYER)
         if rgb_channels is True:
             self.game.set_screen_format(ScreenFormat.RGB24)

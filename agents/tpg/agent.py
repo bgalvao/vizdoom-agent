@@ -47,10 +47,10 @@ class TPGAgent:
         #    do a three round in game env
         #    get screen, execute action, check if finished
         tctr = 1
-        for team in self.team_population.members:
+        for i, team in enumerate(self.team_population.members):
             game_env.reset()
             inpt = game_env.get_screen().flatten()
-            #print('evaluating team {} @{}'.format(tctr, hex(id(team))))
+            print(':::: team', i+1)
             for ronda in range(rounds):
                 #print(':::: playing round', ronda+1)
                 game_env.reset()
@@ -62,7 +62,7 @@ class TPGAgent:
                     game_env.next_state(team.act(inpt))
                 score = game_env.game.get_total_reward()
                 scores.append(score)
-                break
+                
 
             scores = np.array(scores)
             team.fitness = median(scores)  # less sensitive to outliers
@@ -70,7 +70,6 @@ class TPGAgent:
             #     (tctr, np.median(scores), scores.min(), scores.max())
             # )
             tctr += 1
-            break
 
     @property
     def fittest(self):
@@ -140,11 +139,12 @@ class TPGAgent:
     def act(self):
         return self.fittest.act()  # returns the index to some action
 
-    def save(self, game_environment, filename):
-        data = {}
-        for attr in dir(game_environment.game):
-            pass
+    def save(self, config_name, game_environment, filename):
+        import pickle
+        data = {'config_name': config_name}
+        data['game_enviro'] = game_environment
+        data['agent'] = self # it's a team, not the TPGAgent with a pop of teams
 
         with open(filename, mode='wb') as f:
-            pass
+            pickle.dump(data, f)
 
