@@ -76,14 +76,6 @@ class ProgramPopulation(Population):
             self.members.append(parent_1.mutate(tset, fset))
 
 
-    def derefer_from_team_population(self):
-        for program in self.members:
-            program.in_team_pop = False
-
-    def purge(self):
-        self.members = [p for p in self.members if p.in_team_pop is True]
-
-
 def gen_team(program_pop_members, team_size, min_action_set_size=2):
     """
     Generate a new team based on a program population.
@@ -164,7 +156,6 @@ class TeamPopulation(Population):
             self.max_team_size))
             for _ in range(last_group_size)] 
         self.members.extend(last_teams)
-        self._refer_programs()
 
     def select(self, pooling_size=6):
         """
@@ -172,11 +163,6 @@ class TeamPopulation(Population):
         """
         pool = [choice(self.members) for i in range(pooling_size)]
         return max(pool, key=Team.get_fitness)
-
-    def _refer_programs(self):
-        for t in self.members:
-            for p in t:
-                p.in_team_pop = True
 
     def _reproduce(self, program_population):
         # p1 -> parent 1
@@ -206,7 +192,6 @@ class TeamPopulation(Population):
         offspring = deepcopy(self)
         offspring.members = []
         offspring.members.extend(children)
-        offspring._refer_programs()
         return offspring
 
 

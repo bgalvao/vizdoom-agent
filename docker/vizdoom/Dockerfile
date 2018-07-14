@@ -62,6 +62,8 @@ RUN mkdir ${HOME_DIR}/dev
 # ---------------------------------------------------------------------
 # install your code's dependencies here
 RUN pip3 install scikit-image
+RUN pip3 install http://download.pytorch.org/whl/cpu/torch-0.4.0-cp35-cp35m-linux_x86_64.whl
+#RUN pip3 install torchvision
 
 # let these run last
 USER ${USER_NAME}

@@ -152,6 +152,8 @@ class Tree(list):
         if type(from_node) != int:
             raise TypeError('Parameter from_node is an int indicating node\'s index')
         elif from_node < 0 or from_node >= self.size:
+            print('!!! FATAL !!!')
+            print(from_node, self.size)
             raise ValueError('Parameter from_node does not fit size of this tree')
         elif type(self[from_node]) == InputNode:
             return 1

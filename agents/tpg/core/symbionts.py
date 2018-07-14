@@ -16,7 +16,6 @@ class Program():
     def __init__(self, action):
         self.tree = Tree()
         self.action = action  # this may be an atomic action or a team!
-        self.in_team_pop = False  # a flag
 
     # wrapper
     def rgrow(self, functional_set, terminal_set, max_depth=6):
@@ -100,11 +99,6 @@ class Team(list):  # really like a typical GA individual
         offspring_1.extend(p1_left); offspring_1.extend(p2_right)
         #offspring_2.extend(p2_left); offspring_2.extend(p1_right)
 
-        # DANGER ZONE - as in, writing in instances of other classes other
-        # than this one...
-        for program in offspring_1:
-            program.in_team = True
-
         return offspring_1# offspring_2
 
     def mutate(self, program_population):
@@ -120,11 +114,6 @@ class Team(list):  # really like a typical GA individual
         offspring.extend(appendage)
         while not offspring.is_sufficient():
             offspring.append(choice(program_population.members))
-
-        # DANGER ZONE - as in, writing in instances of other classes other
-        # than this one...
-        for program in offspring:
-            program.in_team = True
 
         return offspring
 

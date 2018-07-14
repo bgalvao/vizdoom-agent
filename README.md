@@ -33,6 +33,8 @@ cd ../..
 sudo docker run  -ti --net=host -e DISPLAY=${DISPLAY} --privileged --rm -v $(pwd):/home/vizdoom/dev rl
 ```
 
+Inside the docker image, remember to invoke `python3 cxxx.py`.
+
 
 ^1 Stephen Kelly and Malcolm I. Heywood. 2017.
 _Multi-task learning in Atari video games with emergent tangled program graphs_.

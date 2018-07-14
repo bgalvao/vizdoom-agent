@@ -15,13 +15,17 @@ if __name__ == '__main__':
 
     # start environment with single channel
     env = DoomEnv(config, rgb_channels=False)
-    print(env.atomic_actions)
+    #print(env.atomic_actions)
 
     # initalize functional and terminal sets
     fset = fset()
     sample_data = env.get_screen().flatten()
     tset = tset(sample_data)
-    tpg_agent = TPGAgent(len(env.atomic_actions), fset, tset)
+    tpg_agent = TPGAgent(len(env.atomic_actions), fset, tset,
+        program_population_xo_rate=1.0,
+        team_population_size=3,
+        program_population_size=9
+    )
     tpg_agent.evolve(game_env=env, num_gens=90)
 
     tpg_agent.save(config, env, './saev.pkl')

@@ -41,7 +41,7 @@ class TPGAgent:
         )
         self.team_population.init_pop(self.program_population)
 
-    def evaluate_team_population(self, game_env, rounds = 3):
+    def evaluate_team_population(self, game_env, rounds = 1):
         print('>> evaluating teams in game environment')
         # for each team...
         #    do a three round in game env
@@ -89,7 +89,7 @@ class TPGAgent:
             fresh_pop.members.extend(elite_pop_members)
             return fresh_pop
 
-    def variate_program_population(self, tset, fset, debug=False):
+    def variate_program_population(self, tset, fset, debug=True):
         print('>> variating program population')
         current_pop_size = len(self.program_population.members)
         target_pop_size = self.program_population.pop_size
@@ -113,21 +113,20 @@ class TPGAgent:
             self.evaluate_team_population(game_env)
             print('::::: %.3fs' % (timer() - x))
             print('> this agent scores ::', self.fitness)
-            
-            # set all reference flags to false
-            self.program_population.derefer_from_team_population()
 
             # evolve team population
             # note that here, the programs that are in the new teams
-            # will have their ref flags turned to True
+            # will have their in_team flags turned to True
             x = timer()
             self.team_population = self.variate_team_population(
                 self.program_population
             )
             print('::::: %.3fs' % (timer() - x))
 
-            # so now we can purge the program population correctly
-            self.program_population.purge()
+            # purge the dangling programs
+            surving_programs = [program for team in self.team_population.members for program in team]
+            self.program_population.members = surving_programs
+
             # and variate according to the 'winning' programs
             x = timer()
             self.program_population = self.variate_program_population(

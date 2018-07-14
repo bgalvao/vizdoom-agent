@@ -25,11 +25,9 @@ def pool_size(in_size, kernel_size, stride):
 # based on https://github.com/mwydmuch/ViZDoom/blob/master/examples/python/learning_pytorch.py
 # !!! -> by E. Culurciello, August 2017 <- !!!
 
-resolution = (40, 30)
-
 class ReplayMemory:
 
-    def __init__(self, capacity=10000, res=resolution, color_channels=3):
+    def __init__(self, capacity=10000, res=(40, 30), color_channels=3):
         shape = (capacity, color_channels, res[0], res[1])
         self.s1 = np.zeros(shape, dtype=np.float32)
         self.s2 = np.zeros(shape, dtype=np.float32)
@@ -41,7 +39,6 @@ class ReplayMemory:
         self.capacity = capacity
         self.size = 0
         self.pos = 0
-
 
     def add_transition(self, s1, action, reward, s2, is_terminal):
         self.s1[self.pos, 0, :, :]     = s1
